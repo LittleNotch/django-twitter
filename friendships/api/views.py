@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 class FriendshipViewSet(viewsets.GenericViewSet):
     # POST /api/friendship/1/follow  go to follow user_id=1
     # queryset User.objects.all()
+    serializer_class = FriendshipSerializerForCreate
     queryset = User.objects.all()
 
     @action(methods=['GET'], detail=True, permission_classes=[AllowAny])
@@ -52,23 +53,35 @@ class FriendshipViewSet(viewsets.GenericViewSet):
                 'success': False,
                 'errors': serializer.errors,
             }, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        return Response({'success': True}, status=status.HTTP_201_CREATED)
+        instance = serializer.save()
+        #return Response({'success': True}, status=status.HTTP_201_CREATED)
+        return Response(
+            FollowingSerializer(instance).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(methods=['POST'], detail=True, permission_classes=[IsAuthenticated])
     def unfollow(self, request, pk):
+        unfollow_user = self.get_object()
         # pk type is str, need to convert type
-        if request.user.id == int(pk):
+        #if request.user.id == int(pk):
+        # raise 404 if no user with id=pk
+        if request.user.id == unfollow_user.id:
             return Response({
                 'success': False,
                 'message': 'You cannot unfollow yourself',
             }, status=status.HTTP_400_BAD_REQUEST)
+        # return 2 values, 1st how many ele deleted totally
+        # 2nd how many deleted each type
         deleted, _ = Friendship.objects.filter(
             from_user=request.user,
-            to_user=pk,
+            to_user=unfollow_user,
         ).delete()
         return Response({
             'success': True,
             'deleted': deleted
         })
+
+    def list(self, request):
+        return Response({'message': 'this is friendship home page'})
 
