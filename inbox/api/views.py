@@ -1,12 +1,15 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from inbox.api.serializers import NotificationSerializer
+from inbox.api.serializers import (
+    NotificationSerializer,
+    NotificationSerializerForUpdate,
+)
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from utils.decorators import required_params
 
 
-class NotifcationViewSet(
+class NotificationViewSet(
     viewsets.GenericViewSet,
     viewsets.mixins.ListModelMixin,
 ):
@@ -30,3 +33,36 @@ class NotifcationViewSet(
         return Response({
             'marked_count': updated_count
         }, status=status.HTTP_200_OK)
+
+    @required_params(method='POST', params=['unread'])
+    def update(self, request, *args, **kwargs):
+        """
+        user can mark a notification as read/unread, this an update for notification
+        so override update,
+        another method use action
+            @action(method=['POST], detail=True, url_path='mark-as-read')
+            def mark_as_read(self, request, *args, **kwargs)
+                ...
+            @action(method=['POST], detail=True, url_path='mark-as-unread')
+            def mark_as_unread(self, request, *args, **kwargs)
+                ...
+        both are OK. override update is more restful, mark as read/unread can share
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        serializer = NotificationSerializerForUpdate(
+            instance=self.get_object(),
+            data=request.data,
+        )
+        if not serializer.is_valid():
+            return Response({
+                'message': "Please check input",
+                'errors': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        notification = serializer.save()
+        return Response(
+            NotificationSerializer(notification).data,
+            status=status.HTTP_200_OK
+        )
