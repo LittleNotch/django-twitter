@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)h(j3ly=$d!4#wk*)=i9ba2aplu69sz=3!dwv%3ex(o9)=3t3x'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', '192.168.33.10', 'localhost']
 INTERNAL_IPS = ['10.0.2.2']
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # third party
     'rest_framework',
     'django_filters',
+    'notifications',
 
     # project apps
     'accounts',
@@ -147,7 +148,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 try:
-    from .local_settings import*
+    from .local_settings import *
 except:
     pass
 
