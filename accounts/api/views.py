@@ -1,10 +1,17 @@
 from django.contrib.auth.models import User
-from accounts.api.serializers import UserSerializer, SignupSerializer, LoginSerializer
+from accounts.api.serializers import (
+    LoginSerializer,
+    SignupSerializer,
+    UserProfileSerializerForUpdate,
+    UserSerializer,
+    UserSerializerWithProfile,
+)
+from accounts.models import UserProfile
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import (
     authenticate as django_authenticate,
     login as django_login,
@@ -13,8 +20,8 @@ from django.contrib.auth import (
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserSerializerWithProfile
+    permission_classes = (permissions.IsAdminUser,)
 
 class AccountViewSet(viewsets.ViewSet):
     permission_classes = (AllowAny,)
@@ -82,3 +89,11 @@ class AccountViewSet(viewsets.ViewSet):
         if request.user.is_authenticated:
             data['user'] = UserSerializer(request.user).data
         return Response(data)
+
+class UserProfileViewSet(
+    viewsets.GenericViewSet,
+    viewsets.mixins.UpdateModelMixin,
+):
+    queryset = UserProfile
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserProfileSerializerForUpdate

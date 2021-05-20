@@ -1,5 +1,7 @@
 *.box
 /.vagrant
+Vagrantfile
+media/
 *.DS_Store
 __pycache__
 /.idea
