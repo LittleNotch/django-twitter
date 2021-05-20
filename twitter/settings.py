@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 
+import sys
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -146,6 +148,30 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# where to storage for user upload files
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+TESTING = ((" ".join(sys.argv)).find('manage.py test') != -1)
+if TESTING:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# s3boto3 needs AWS config set BUCKET_NAME
+# and REGION_NAME
+AWS_STORAGE_BUCKET_NAME = 'django-twitter'
+AWS_S3_REGION_NAME = 'us-west-1'
+
+# local_setting.py
+# AWS_ACCESS_KEY_ID = 'YOUR_ACCESS_KEY_ID'
+# AWS_SECRET_ACCESS_KEY = 'YOUR_SECRET_ACCESS_KEY'
+
+
+# media storage user upload
+# default FileSystemStorage as DEFAULT_FILE_STORAGE
+# default under MEDIA_ROOT
+# media and static diff
+# static css, js code files which user can access
+# media user upload file, not code files
+MEDIA_ROOT = 'media/'
 
 try:
     from .local_settings import *
