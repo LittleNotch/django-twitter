@@ -38,7 +38,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
     @action(methods=['POST'], detail=True, permission_classes=[IsAuthenticated])
     def follow(self, request, pk):
         # dup follow e.g. front end click follow many times
-        # keep scilent network delay, it is not a real error
+        # keep silent network delay, it is not a real error
         if Friendship.objects.filter(from_user=request.user, to_user=pk).exists():
             return Response({
                 'success': True,
