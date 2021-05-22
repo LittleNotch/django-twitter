@@ -1,4 +1,3 @@
-from comments.api.permissions import IsObjectOwner
 from comments.api.serializers import (
     CommentSerializer,
     CommentSerializerForCreate,
@@ -10,6 +9,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from utils.decorators import required_params
+from utils.permissions import IsObjectOwner
 
 
 
@@ -34,7 +34,7 @@ class CommentViewSet(viewsets.GenericViewSet):
     @required_params(params=['tweet_id'])
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        comments = self.filter_queryset(queryset).order_by('created_at')
+        comments = self.filter_queryset(queryset).prefetch_related('user').order_by('created_at')
         serializer = CommentSerializer(
             comments,
             context={'request': request},
