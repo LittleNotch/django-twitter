@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from inbox.api.serializers import (
     NotificationSerializer,
     NotificationSerializerForUpdate,
