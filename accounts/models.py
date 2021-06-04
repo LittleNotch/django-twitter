@@ -1,5 +1,7 @@
-from django.db import models
+from accounts.listeners import user_changed, profile_changed
 from django.contrib.auth.models import User
+from django.db import models
+from django.db.models.signals import post_save, pre_delete
 
 
 class UserProfile(models.Model):
@@ -21,9 +23,12 @@ class UserProfile(models.Model):
 # when user_instance.profile, UserProfile get_or_create to get profile object
 # python benefit to hack, easy to get profile via User
 def get_profile(user):
+    # put import inside function to prevent cycling dependence
+    from accounts.services import UserService
+
     if hasattr(user, '_cached_user_profile'):
         return getattr(user, '_cached_user_profile')
-    profile, _= UserProfile.objects.get_or_create(user=user)
+    profile = UserService.get_profile_through_cache(user.id)
     # cache User, avoid same user profile multi DB
     setattr(user, '_cached_user_profile', profile)
     return profile
@@ -31,3 +36,10 @@ def get_profile(user):
 
 # add profile property to User model for quick visit
 User.profile = property(get_profile)
+
+# hook up with listeners to invalidate cache
+pre_delete.connect(user_changed, sender=User)
+post_save.connect(user_changed, sender=User)
+
+pre_delete.connect(profile_changed, sender=UserProfile)
+post_save.connect(profile_changed, sender=UserProfile)

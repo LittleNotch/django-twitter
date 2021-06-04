@@ -55,7 +55,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
                 'errors': serializer.errors,
             }, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-        FriendshipService.invalidate_following_cache(request.user.id)
+        #FriendshipService.invalidate_following_cache(request.user.id)
         return Response({'success': True}, status=status.HTTP_201_CREATED)
 
 
@@ -76,7 +76,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
             from_user=request.user,
             to_user=unfollow_user,
         ).delete()
-        FriendshipService.invalidate_following_cache(request.user.id)
+        #FriendshipService.invalidate_following_cache(request.user.id)
         return Response({
             'success': True,
             'deleted': deleted
