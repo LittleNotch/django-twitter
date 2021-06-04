@@ -158,7 +158,7 @@ if TESTING:
 
 # s3boto3 needs AWS config set BUCKET_NAME
 # and REGION_NAME
-AWS_STORAGE_BUCKET_NAME = 'django-twitter'
+AWS_STORAGE_BUCKET_NAME = 'django-twitter-2021'
 AWS_S3_REGION_NAME = 'us-west-1'
 
 # local_setting.py

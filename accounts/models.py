@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class UserProfile(models.Model):
-    # One2one filed creates a unique index, avoid mutil UserProfile -> User
+    # One2one filed creates a unique index, avoid multi UserProfile -> User
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     # Django also has a ImageField, try not to use it, has more problems
     # FileField can do the same thing, eventually save in file format, use url to visit
