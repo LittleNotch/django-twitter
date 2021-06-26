@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.utils.decorators import method_decorator
 from friendships.api.paginations import FriendshipPagination
 from friendships.api.serializers import (
     FollowerSerializer,
@@ -7,6 +8,7 @@ from friendships.api.serializers import (
 )
 from friendships.models import Friendship
 from friendships.services import FriendshipService
+from ratelimit.decorators import ratelimit
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -22,6 +24,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
     pagination_class = FriendshipPagination
 
     @action(methods=['GET'], detail=True, permission_classes=[AllowAny])
+    @method_decorator(ratelimit(key='user_or_ip', rate='3/s', method='GET', block=True))
     def followers(self, request, pk):
         friendships = Friendship.objects.filter(to_user_id=pk).order_by('-created_at')
         page = self.paginate_queryset(friendships)
@@ -29,6 +32,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['GET'], detail=True, permission_classes=[AllowAny])
+    @method_decorator(ratelimit(key='user_or_ip', rate='3/s', method='GET', block=True))
     def followings(self, request, pk):
         friendships = Friendship.objects.filter(from_user_id=pk).order_by('-created_at')
         page = self.paginate_queryset(friendships)
@@ -37,6 +41,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 
 
     @action(methods=['POST'], detail=True, permission_classes=[IsAuthenticated])
+    @method_decorator(ratelimit(key='user', rate='10/s', method='POST', block=True))
     def follow(self, request, pk):
         # dup follow e.g. front end click follow many times
         # keep silent network delay, it is not a real error
@@ -60,6 +65,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 
 
     @action(methods=['POST'], detail=True, permission_classes=[IsAuthenticated])
+    @method_decorator(ratelimit(key='user', rate='10/s', method='POST', block=True))
     def unfollow(self, request, pk):
         unfollow_user = self.get_object()
         # pk type is str, need to convert type

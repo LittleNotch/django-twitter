@@ -1,8 +1,9 @@
-from django_filters.rest_framework import DjangoFilterBackend
+from django.utils.decorators import method_decorator
 from inbox.api.serializers import (
     NotificationSerializer,
     NotificationSerializerForUpdate,
 )
+from ratelimit.decorators import ratelimit
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -22,6 +23,7 @@ class NotificationViewSet(
         return self.request.user.notifications.all()
 
     @action(methods=['GET'], detail=False, url_path='unread-count')
+    @method_decorator(ratelimit(key='user', rate='3/s', method='GET', block=True))
     def unread_count(self, request, *args, **kwargs):
         count = self.get_queryset().filter(unread=True).count()
         return Response({
@@ -29,6 +31,7 @@ class NotificationViewSet(
         }, status=status.HTTP_200_OK)
 
     @action(methods=['POST'], detail=False, url_path='mark-all-as-read')
+    @method_decorator(ratelimit(key='user', rate='3/s', method='POST', block=True))
     def mark_all_as_read(self, request, *args, **kwargs):
         updated_count = self.get_queryset().update(unread=False)
         return Response({
@@ -36,6 +39,7 @@ class NotificationViewSet(
         }, status=status.HTTP_200_OK)
 
     @required_params(method='POST', params=['unread'])
+    @method_decorator(ratelimit(key='user', rate='3/s', method='POST', block=True))
     def update(self, request, *args, **kwargs):
         """
         user can mark a notification as read/unread, this an update for notification
