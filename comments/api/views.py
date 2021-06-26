@@ -75,7 +75,7 @@ class CommentViewSet(viewsets.GenericViewSet):
             data=request.data,
         )
         if not serializer.is_valid():
-            raise Response({
+            return Response({
                 'message': 'Please check input.'
             }, status=status.HTTP_400_BAD_REQUEST)
         # save() will trigger update()

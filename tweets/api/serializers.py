@@ -31,7 +31,7 @@ class TweetSerializer(serializers.ModelSerializer):
         )
 
     def get_likes_count(self, obj):
-        return RedisHelper.get_count(obj, 'likes_count')
+        return RedisHelper.get_count (obj, 'likes_count')
 
     def get_comments_count(self, obj):
         return RedisHelper.get_count(obj, 'comments_count')
