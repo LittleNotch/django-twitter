@@ -85,7 +85,7 @@ class TweetApiTests(TestCase):
         # upload one single file
         # content needs bytes type, str.encode to convert
         file = SimpleUploadedFile(
-            name='https://django-twitter-2021.s3-us-west-1.amazonaws.com/selfie.jpg',
+            name='selfie.jpg',
             content=str.encode('a fake image'),
             content_type='image/jpeg',
         )
@@ -98,12 +98,12 @@ class TweetApiTests(TestCase):
 
         # upload multi files
         file1 = SimpleUploadedFile(
-            name='https://django-twitter-2021.s3-us-west-1.amazonaws.com/selfie1.jpg',
+            name='selfie1.jpg',
             content=str.encode('selfie 1'),
             content_type='image/jpeg',
         )
         file2 = SimpleUploadedFile(
-            name='https://django-twitter-2021.s3-us-west-1.amazonaws.com/selfie2.jpg',
+            name='selfie2.jpg',
             content=str.encode('selfie 2'),
             content_type='image/jpeg',
         )
