@@ -1,8 +1,13 @@
 *.box
-/.vagrant
+.vagrant
 Vagrantfile
 media/
-*.DS_Store
+hbase-2.3.5/
+.DS_Store
+jdk-8u291-linux-x64.tar.gz
+hbase-2.3.5-bin.tar.gz
+thrift-0.14.2.tar.gz
+thrift-0.14.2/
 __pycache__
 /.idea
 /temp
