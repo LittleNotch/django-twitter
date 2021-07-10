@@ -12,7 +12,7 @@ class RedisHelper:
         serialized_list = []
         # cache REDIS_LIST_LENGTH_LIMIT
         # if more than this number, go to DB to fetch
-        for obj in objects[:settings.REDIS_LIST_LENGTH_LIMIT]:
+        for obj in objects:
             serialized_data = DjangoModelSerializer.serialize(obj)
             serialized_list.append(serialized_data)
 
@@ -22,6 +22,7 @@ class RedisHelper:
 
     @classmethod
     def load_objects(cls, key, queryset):
+        queryset = queryset[:settings.REDIS_LIST_LENGTH_LIMIT]
         conn = RedisClient.get_connection()
 
         # cache hit
@@ -40,6 +41,7 @@ class RedisHelper:
 
     @classmethod
     def push_objects(cls, key, obj, queryset):
+        queryset = queryset[:settings.REDIS_LIST_LENGTH_LIMIT]
         conn = RedisClient.get_connection()
 
         # cache miss, load from DB
