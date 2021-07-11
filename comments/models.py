@@ -18,6 +18,9 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # new added field null=True, if only default=0, will scan all the table
+    likes_count = models.IntegerField(default=0, null=True)
+
     class Meta:
         # sort all the comments under a tweet
         index_together = (('tweet', 'created_at'),)
