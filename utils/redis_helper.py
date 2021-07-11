@@ -33,7 +33,6 @@ class RedisHelper:
                 deserialized_obj = DjangoModelSerializer.deserialize(serialized_data)
                 objects.append(deserialized_obj)
             return objects
-
         cls._load_objects_to_cache(key, queryset)
 
         # redis in format of list
