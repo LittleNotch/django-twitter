@@ -221,6 +221,7 @@ CELERY_TASK_ALWAYS_EAGER = TESTING
 CELERY_QUEUES = (
     Queue('default', routing_key='default'),
     Queue('newsfeeds', routing_key='newsfeeds'),
+    Queue('likes', routing_key='likes'),
 )
 
 # Rate Limiter
