@@ -51,6 +51,7 @@ class LikeSerializerForCreate(BaseLikeSerializerForCreateAndCancel):
             object_id=self.validated_data['object_id'],
             user=self.context['request'].user,
         )
+    
 
 class LikeSerializerForCancel(BaseLikeSerializerForCreateAndCancel):
 
