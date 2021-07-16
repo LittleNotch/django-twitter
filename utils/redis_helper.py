@@ -89,3 +89,18 @@ class RedisHelper:
         conn.set(key, count)
         return count
 
+    @classmethod
+    def add_id_to_set(cls, name, values):
+        conn = RedisClient.get_connection()
+        conn.sadd(name, *values)
+
+    @classmethod
+    def remove_id_from_set(cls, name, values):
+        conn = RedisClient.get_connection()
+        conn.srem(name, *values)
+
+    @classmethod
+    def get_all_members_from_set(cls, name):
+        conn = RedisClient.get_connection()
+        return conn.smembers(name)
+

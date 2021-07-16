@@ -4,6 +4,7 @@ from friendships.models import Friendship
 from twitter.cache import FOLLOWINGS_PATTERN
 from gatekeeper.models import GateKeeper
 from friendships.hbase_models import HBaseFollowing, HBaseFollower
+from utils.redis_helper import RedisHelper
 
 import time
 
@@ -22,11 +23,20 @@ class FriendshipService(object):
 
     @classmethod
     def get_following_user_id_set(cls, from_user_id):
-        # <TODO> cache in redis set
-        # key = FOLLOWINGS_PATTERN.format(user_id=from_user_id)
-        # user_id_set = cache.get(key)
-        # if user_id_set is not None:
-        #     return user_id_set
+        # cache set in Redis
+        name = FOLLOWINGS_PATTERN.format(user_id=from_user_id)
+        user_id_set = RedisHelper.get_all_members_from_set(name)
+
+        # cache hit, need to change b'123' -> 123
+        if user_id_set is not None:
+            user_id_set_new = set([])
+            for user_id in user_id_set:
+                if isinstance(user_id, bytes):
+                    user_id = user_id.decode('utf-8')
+                    user_id_set_new.add(int(user_id))
+            return user_id_set_new
+
+        # cache miss
         if not GateKeeper.is_switch_on('switch_friendship_to_hbase'):
             friendships = Friendship.objects.filter(from_user_id=from_user_id)
         else:
@@ -35,7 +45,9 @@ class FriendshipService(object):
             fs.to_user_id
             for fs in friendships
         ])
-        # cache.set(key, user_id_set)
+
+        # push in Redis
+        RedisHelper.add_id_to_set(name, user_id_set)
         return user_id_set
 
     @classmethod
@@ -70,6 +82,10 @@ class FriendshipService(object):
         if from_user_id == to_user_id:
             return None
 
+        # update Redis
+        cls.add_following_id_in_redis(from_user_id, to_user_id)
+
+        # update DB
         if not GateKeeper.is_switch_on('switch_friendship_to_hbase'):
             # create data in MySQL
             return Friendship.objects.create(
@@ -95,6 +111,10 @@ class FriendshipService(object):
         if from_user_id == to_user_id:
             return 0
 
+        # update Redis
+        cls.remove_following_id_in_redis(from_user_id, to_user_id)
+
+        # update DB
         if not GateKeeper.is_switch_on('switch_friendship_to_hbase'):
             deleted, _ = Friendship.objects.filter(
                 from_user_id=from_user_id,
@@ -115,3 +135,18 @@ class FriendshipService(object):
             return Friendship.objects.filter(from_user_id=from_user_id).count()
         followings = HBaseFollowing.filter(prefix=(from_user_id, None))
         return len(followings)
+
+    @classmethod
+    def add_following_id_in_redis(cls, from_user_id, to_user_id):
+        name = FOLLOWINGS_PATTERN.format(user_id=from_user_id)
+        id_set = set([to_user_id])
+
+        RedisHelper.add_id_to_set(name, id_set)
+
+
+    @classmethod
+    def remove_following_id_in_redis(cls, from_user_id, to_user_id):
+        name = FOLLOWINGS_PATTERN.format(user_id=from_user_id)
+        id_set = set([to_user_id])
+
+        RedisHelper.remove_id_from_set(name, id_set)
