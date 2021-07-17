@@ -39,7 +39,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
     @action(methods=['GET'], detail=True, permission_classes=[AllowAny])
     @method_decorator(ratelimit(key='user_or_ip', rate='3/s', method='GET', block=True))
     def followings(self, request, pk):
-        if GateKeeper.is_switch_on('switch_friendship_to_habse'):
+        if GateKeeper.is_switch_on('switch_friendship_to_hbase'):
             page = self.paginator.paginate_hbase(HBaseFollowing, (pk,), request)
         else:
             friendships = Friendship.objects.filter(from_user_id=pk).order_by('-created_at')
